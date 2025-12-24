@@ -1,7 +1,7 @@
 package com.example.demo.controller;
 
 import com.example.demo.entity.User;
-import com.example.demo.service.UserService;
+import com.example.demo.service.UserService; // 👈 引入 Service
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,7 +14,7 @@ import java.util.Map;
 public class UserController {
 
     @Autowired
-    private UserService userService;
+    private UserService userService; // 👈 注入大厨
 
     @PostMapping("/login")
     public Map<String, Object> login(@RequestBody Map<String, String> loginData) {
@@ -31,23 +31,11 @@ public class UserController {
             result.put("msg", "登录成功");
             result.put("token", "token-" + user.getUsername() + "-" + System.currentTimeMillis());
 
-            // ⭐ 准备返回给前端的用户信息
-            Map<String, Object> userInfo = new HashMap<>();
-
-            // ✅ 关键点 1：返回 ID (前端查档案必须要用这个)
-            userInfo.put("id", user.getId());
-
-            // ✅ 关键点 2：返回姓名 (注意 getter 是 getName)
-            userInfo.put("name", user.getName());
-
-            userInfo.put("role", user.getRole());
-
-            // ✅ 关键点 3：返回头像 (优先用数据库里的，没有就用默认)
-            String avatarUrl = user.getAvatar();
-            if (avatarUrl == null || avatarUrl.isEmpty()) {
-                avatarUrl = "https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png";
-            }
-            userInfo.put("avatar", avatarUrl);
+            // 返回数据库里的真实姓名
+            Map<String, String> userInfo = new HashMap<>();
+            userInfo.put("name", user.getFullName()); // 例如 "系统管理员"
+            userInfo.put("role", user.getRole());     // 例如 "ADMIN"
+            userInfo.put("avatar", "https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png");
 
             result.put("userInfo", userInfo);
         } else {
