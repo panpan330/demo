@@ -1,59 +1,44 @@
 package com.example.demo.controller;
 
+import com.example.demo.common.Result;
 import com.example.demo.entity.User;
 import com.example.demo.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.HashMap;
+import jakarta.annotation.Resource;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/api/user")
-@CrossOrigin(origins = "*")
 public class UserController {
 
-    @Autowired
+    @Resource
     private UserService userService;
 
+    /**
+     * 登录接口
+     */
     @PostMapping("/login")
-    public Map<String, Object> login(@RequestBody Map<String, String> loginData) {
-        String username = loginData.get("username");
-        String password = loginData.get("password");
-
-        Map<String, Object> result = new HashMap<>();
-
-        // 调用 Service 进行数据库校验
-        User user = userService.login(username, password);
-
-        if (user != null) {
-            result.put("code", 200);
-            result.put("msg", "登录成功");
-            result.put("token", "token-" + user.getUsername() + "-" + System.currentTimeMillis());
-
-            // ⭐ 准备返回给前端的用户信息
-            Map<String, Object> userInfo = new HashMap<>();
-
-            // ✅ 关键点 1：返回 ID (前端查档案必须要用这个)
-            userInfo.put("id", user.getId());
-
-            // ✅ 关键点 2：返回姓名 (注意 getter 是 getName)
-            userInfo.put("name", user.getName());
-
-            userInfo.put("role", user.getRole());
-
-            // ✅ 关键点 3：返回头像 (优先用数据库里的，没有就用默认)
-            String avatarUrl = user.getAvatar();
-            if (avatarUrl == null || avatarUrl.isEmpty()) {
-                avatarUrl = "https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png";
-            }
-            userInfo.put("avatar", avatarUrl);
-
-            result.put("userInfo", userInfo);
-        } else {
-            result.put("code", 401);
-            result.put("msg", "用户名或密码错误");
+    public Result<?> login(@RequestBody User user) {
+        try {
+            // 逻辑全在 Service 里，这里只负责接收结果
+            Map<String, Object> data = userService.login(user);
+            return Result.success(data);
+        } catch (RuntimeException e) {
+            // 捕获 Service 抛出的异常（如“密码错误”）并封装返回
+            return Result.error("-1", e.getMessage());
         }
-        return result;
+    }
+
+    /**
+     * 新增用户接口
+     */
+    @PostMapping("/add")
+    public Result<?> add(@RequestBody User user) {
+        try {
+            userService.register(user);
+            return Result.success();
+        } catch (RuntimeException e) {
+            return Result.error("-1", e.getMessage());
+        }
     }
 }
