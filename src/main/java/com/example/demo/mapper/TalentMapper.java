@@ -1,31 +1,31 @@
 package com.example.demo.mapper;
 
 import com.example.demo.entity.Talent;
-import org.apache.ibatis.annotations.Delete;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.*;
 import java.util.List;
 
 @Mapper
 public interface TalentMapper {
 
-    // 1. 查询所有 (如果你想显示关联的账号名，这里以后可能要改关联查询，现在先查基本信息)
     @Select("SELECT * FROM sys_talent")
     List<Talent> findAll();
 
-    // 2. ⭐⭐ 关键修复在这里！⭐⭐
-    // 以前可能漏了 "user_id" 和 "#{userId}"
-    // 现在必须加上，否则 Service 层辛苦生成的 ID 存不进去！
-    @Insert("INSERT INTO sys_talent(name, role, cs_score, med_score, user_id) " +
-            "VALUES(#{name}, #{role}, #{csScore}, #{medScore}, #{userId})")
+    // ⭐ 修改 Insert：加入 id_card 和 address
+    @Insert("INSERT INTO sys_talent(name, role, cs_score, med_score, user_id, gender, phone, education, major, email, birthday, id_card, address) " +
+            "VALUES(#{name}, #{role}, #{csScore}, #{medScore}, #{userId}, #{gender}, #{phone}, #{education}, #{major}, #{email}, #{birthday}, #{idCard}, #{address})")
     void add(Talent talent);
 
-    // 3. 删除
+    // ⭐ 修改 Update：加入 id_card 和 address
+    @Update("UPDATE sys_talent SET name=#{name}, gender=#{gender}, birthday=#{birthday}, " +
+            "education=#{education}, major=#{major}, phone=#{phone}, email=#{email}, " +
+            "id_card=#{idCard}, address=#{address}, " + // <-- 加上这一行
+            "role=#{role}, cs_score=#{csScore}, med_score=#{medScore} " +
+            "WHERE id = #{id}")
+    void update(Talent talent);
+
     @Delete("DELETE FROM sys_talent WHERE id = #{id}")
     void deleteById(Long id);
 
-    // 4. 根据 userId 查档案 (个人中心用)
     @Select("SELECT * FROM sys_talent WHERE user_id = #{userId}")
     Talent selectByUserId(Long userId);
 }

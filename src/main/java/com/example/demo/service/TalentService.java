@@ -13,4 +13,6 @@ public interface TalentService {
     void deleteTalent(Long id);
 
     Talent getTalentByUserId(Long userId);
+    // ... 其他方法
+    void updateTalent(Talent talent); // 新增这一行
 }

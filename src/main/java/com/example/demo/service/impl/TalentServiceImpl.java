@@ -85,6 +85,12 @@ public class TalentServiceImpl implements TalentService {
     public void deleteTalent(Long id) {
         talentMapper.deleteById(id);
     }
+    // ...
+    @Override
+    public void updateTalent(Talent talent) {
+        talentMapper.update(talent);
+    }
+// ...
 
     @Override
     public Talent getTalentByUserId(Long userId) {

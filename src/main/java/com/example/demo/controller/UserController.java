@@ -9,29 +9,22 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/user")
+@CrossOrigin // ⭐⭐⭐ 加上这一行！允许前端跨域访问 ⭐⭐⭐
 public class UserController {
 
     @Resource
     private UserService userService;
 
-    /**
-     * 登录接口
-     */
     @PostMapping("/login")
     public Result<?> login(@RequestBody User user) {
         try {
-            // 逻辑全在 Service 里，这里只负责接收结果
             Map<String, Object> data = userService.login(user);
             return Result.success(data);
         } catch (RuntimeException e) {
-            // 捕获 Service 抛出的异常（如“密码错误”）并封装返回
             return Result.error("-1", e.getMessage());
         }
     }
 
-    /**
-     * 新增用户接口
-     */
     @PostMapping("/add")
     public Result<?> add(@RequestBody User user) {
         try {
