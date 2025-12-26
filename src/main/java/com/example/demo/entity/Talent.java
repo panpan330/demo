@@ -5,6 +5,7 @@ import com.alibaba.excel.annotation.ExcelProperty;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import java.util.Date;
+import com.alibaba.excel.annotation.ExcelIgnore;
 
 @Data
 public class Talent {
@@ -45,6 +46,12 @@ public class Talent {
 
     @ExcelProperty("家庭地址")
     private String address;
+
+    @ExcelIgnore // 导入导出时不处理它，由系统自动生成
+    private Double lng;
+
+    @ExcelIgnore
+    private Double lat;
 
     @ExcelProperty("计算机能力")
     private Integer csScore;

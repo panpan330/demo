@@ -10,16 +10,22 @@ public interface TalentMapper {
     @Select("SELECT * FROM sys_talent")
     List<Talent> findAll();
 
-    // ⭐ 修改 Insert：加入 id_card 和 address
-    @Insert("INSERT INTO sys_talent(name, role, cs_score, med_score, user_id, gender, phone, education, major, email, birthday, id_card, address) " +
-            "VALUES(#{name}, #{role}, #{csScore}, #{medScore}, #{userId}, #{gender}, #{phone}, #{education}, #{major}, #{email}, #{birthday}, #{idCard}, #{address})")
+    // ⭐ 检查：这里必须要有 lng, lat
+    @Insert("INSERT INTO sys_talent(" +
+            "name, gender, role, birthday, education, major, phone, email, " +
+            "id_card, address, lng, lat, cs_score, med_score, user_id" +
+            ") VALUES (" +
+            "#{name}, #{gender}, #{role}, #{birthday}, #{education}, #{major}, #{phone}, #{email}, " +
+            "#{idCard}, #{address}, #{lng}, #{lat}, #{csScore}, #{medScore}, #{userId}" +
+            ")")
     void add(Talent talent);
 
-    // ⭐ 修改 Update：加入 id_card 和 address
-    @Update("UPDATE sys_talent SET name=#{name}, gender=#{gender}, birthday=#{birthday}, " +
+    // ⭐ 检查：这里也必须要有 lng, lat
+    @Update("UPDATE sys_talent SET " +
+            "name=#{name}, gender=#{gender}, role=#{role}, birthday=#{birthday}, " +
             "education=#{education}, major=#{major}, phone=#{phone}, email=#{email}, " +
-            "id_card=#{idCard}, address=#{address}, " + // <-- 加上这一行
-            "role=#{role}, cs_score=#{csScore}, med_score=#{medScore} " +
+            "id_card=#{idCard}, address=#{address}, lng=#{lng}, lat=#{lat}, " +
+            "cs_score=#{csScore}, med_score=#{medScore} " +
             "WHERE id = #{id}")
     void update(Talent talent);
 
