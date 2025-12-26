@@ -1,51 +1,69 @@
 package com.example.demo.controller;
 
+import com.example.demo.common.Result;
 import com.example.demo.entity.Training;
 import com.example.demo.service.TrainingService;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/training")
-@CrossOrigin(origins = "*")
+@CrossOrigin // 允许跨域
 public class TrainingController {
 
-    @Autowired private TrainingService trainingService;
+    @Resource
+    private TrainingService trainingService;
 
-    // ⭐ 修改点：返回值改为 List<Training>
+    // 获取所有
     @GetMapping("/all")
-    public List<Training> all() {
-        return trainingService.getAllTrainings(); // 👈 这里改了
+    public Result<?> all() {
+        return Result.success(trainingService.getAllTrainings());
     }
 
-    // ... 其他方法保持不变 ...
+    // 获取某人
     @GetMapping("/list/{talentId}")
-    public List<Training> listOne(@PathVariable Long talentId) { return trainingService.getTalentTrainings(talentId); }
-
-    @PostMapping("/add")
-    public String add(@RequestBody Training training) {
-        trainingService.addTraining(training);
-        return "success";
+    public Result<?> listOne(@PathVariable Long talentId) {
+        return Result.success(trainingService.getTalentTrainings(talentId));
     }
 
-    @PostMapping("/assign")
-    public String assignBatch(@RequestBody List<Training> list) {
-        for (Training t : list) {
-            trainingService.addTraining(t);
+    // ⭐ AI 自动指派接口
+    @PostMapping("/auto-assign/{talentId}")
+    public Result<?> autoAssign(@PathVariable Long talentId) {
+        try {
+            List<String> courses = trainingService.autoAssign(talentId);
+            return Result.success(courses);
+        } catch (Exception e) {
+            return Result.error("-1", e.getMessage());
         }
-        return "success";
     }
 
+    // 手动新增
+    @PostMapping("/add")
+    public Result<?> add(@RequestBody Training training) {
+        trainingService.addTraining(training);
+        return Result.success();
+    }
+
+    // 更新信息
     @PutMapping("/update")
-    public String update(@RequestBody Training training) {
+    public Result<?> update(@RequestBody Training training) {
         trainingService.updateTraining(training);
-        return "success";
+        return Result.success();
     }
 
+    // 快捷更新状态
+    @PostMapping("/update-status")
+    public Result<?> updateStatus(@RequestBody Training training) {
+        trainingService.updateStatus(training.getId(), training.getStatus());
+        return Result.success();
+    }
+
+    // 删除
     @DeleteMapping("/delete/{id}")
-    public String delete(@PathVariable Long id) {
+    public Result<?> delete(@PathVariable Long id) {
         trainingService.deleteTraining(id);
-        return "success";
+        return Result.success();
     }
 }
