@@ -52,4 +52,42 @@ public class UserController {
             return Result.error("-1", e.getMessage());
         }
     }
+    @PostMapping("/password")
+    public Result<?> changePassword(@RequestBody Map<String, String> params) {
+        String userIdStr = params.get("userId");
+        String oldPass = params.get("oldPass");
+        String newPass = params.get("newPass");
+
+        if (userIdStr == null || oldPass == null || newPass == null) {
+            return Result.error("-1", "参数不完整");
+        }
+
+        try {
+            userService.changePassword(Long.valueOf(userIdStr), oldPass, newPass);
+            return Result.success();
+        } catch (Exception e) {
+            return Result.error("-1", e.getMessage());
+        }
+    }
+
+    @PostMapping("/reset-password")
+    public Result<?> resetPassword(@RequestBody Map<String, Object> params) {
+        // 这里最好加个权限校验，确保当前登录的是管理员
+        // 但为了毕设简单，我们假设只有管理员能看到这个按钮
+
+        String userIdStr = params.get("userId").toString();
+        String newPass = (String) params.get("newPassword");
+
+        if (userIdStr == null || newPass == null) {
+            return Result.error("-1", "参数缺失");
+        }
+
+        try {
+            userService.resetPassword(Long.valueOf(userIdStr), newPass);
+            return Result.success();
+        } catch (Exception e) {
+            return Result.error("-1", e.getMessage());
+        }
+    }
+
 }

@@ -14,4 +14,8 @@ public interface UserService {
      * 注册用户
      */
     void register(User user);
+
+    void changePassword(Long userId, String oldPass, String newPass);
+
+    void resetPassword(Long userId, String newPassword);
 }
