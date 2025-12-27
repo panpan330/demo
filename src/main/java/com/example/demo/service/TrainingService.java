@@ -19,4 +19,7 @@ public interface TrainingService {
 
     // 删除任务
     void deleteTraining(Long id);
+
+    // 新增接口定义
+    List<Training> autoAssign(Long talentId);
 }
