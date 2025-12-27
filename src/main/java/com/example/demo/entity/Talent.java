@@ -5,7 +5,6 @@ import com.alibaba.excel.annotation.ExcelProperty;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import java.util.Date;
-import com.alibaba.excel.annotation.ExcelIgnore;
 
 @Data
 public class Talent {
@@ -16,30 +15,30 @@ public class Talent {
     private String name;
 
     @ExcelProperty("性别")
-    private String gender; // 新增
+    private String gender;
 
-    @ExcelProperty("年龄") // 数据库没存年龄，但可以通过出生日期算，这里暂时留字段方便前端传，或者存出生日期
-    @ExcelIgnore // 数据库没这个字段，暂时忽略导出，或者后续我们在 getter 里计算
+    @ExcelProperty("年龄")
+    @ExcelIgnore
     private Integer age;
 
     @ExcelProperty("出生日期")
-    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8") // 格式化日期
-    private Date birthday; // 新增
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
+    private Date birthday;
 
     @ExcelProperty("角色")
     private String role;
 
     @ExcelProperty("学历")
-    private String education; // 新增
+    private String education;
 
     @ExcelProperty("专业")
-    private String major; // 新增
+    private String major;
 
     @ExcelProperty("手机号")
-    private String phone; // 新增
+    private String phone;
 
     @ExcelProperty("邮箱")
-    private String email; // 新增
+    private String email;
 
     @ExcelProperty("身份证号")
     private String idCard;
@@ -47,7 +46,7 @@ public class Talent {
     @ExcelProperty("家庭地址")
     private String address;
 
-    @ExcelIgnore // 导入导出时不处理它，由系统自动生成
+    @ExcelIgnore
     private Double lng;
 
     @ExcelIgnore
@@ -59,6 +58,10 @@ public class Talent {
     @ExcelProperty("医学能力")
     private Integer medScore;
 
-    @ExcelIgnore // 导出时不需要显示关联的用户ID
+    @ExcelIgnore
     private Long userId;
+
+    // ⭐⭐ 新增：用于接收 sys_user 表查询出来的登录账号
+    @ExcelIgnore // 不导出到 Excel，仅用于前端显示和重置密码
+    private String username;
 }

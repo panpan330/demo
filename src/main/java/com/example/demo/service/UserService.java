@@ -5,17 +5,15 @@ import java.util.Map;
 
 public interface UserService {
 
-    /**
-     * 用户登录，返回 Token 和 UserInfo
-     */
     Map<String, Object> login(User user);
 
-    /**
-     * 注册用户
-     */
     void register(User user);
 
     void changePassword(Long userId, String oldPass, String newPass);
 
+    // 旧的基于ID的重置方法 (保留也行，但主要用下面这个)
     void resetPassword(Long userId, String newPassword);
+
+    // ⭐ 新增：基于用户名的重置方法
+    void resetPasswordByUsername(String username, String newPass);
 }

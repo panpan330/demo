@@ -10,24 +10,18 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/user")
-@CrossOrigin
+@CrossOrigin // 允许跨域
 public class UserController {
 
     @Resource
     private UserService userService;
 
-    /**
-     * 登录接口
-     */
     @PostMapping("/login")
     public Result<?> login(@RequestBody User user) {
-        // 简单的判空
         if (user.getUsername() == null || user.getPassword() == null) {
             return Result.error("-1", "账号或密码不能为空");
         }
-
         try {
-            // ⭐ 直接调用 Service 的 login 方法，它会返回包含 token 和 user 的 Map
             Map<String, Object> map = userService.login(user);
             return Result.success(map);
         } catch (Exception e) {
@@ -35,23 +29,19 @@ public class UserController {
         }
     }
 
-    /**
-     * 注册接口
-     */
     @PostMapping("/register")
     public Result<?> register(@RequestBody User user) {
         if (user.getUsername() == null || user.getPassword() == null) {
             return Result.error("-1", "输入不合法");
         }
-
         try {
-            // ⭐ 直接调用 Service 的 register 方法
             userService.register(user);
             return Result.success();
         } catch (Exception e) {
             return Result.error("-1", e.getMessage());
         }
     }
+
     @PostMapping("/password")
     public Result<?> changePassword(@RequestBody Map<String, String> params) {
         String userIdStr = params.get("userId");
@@ -61,7 +51,6 @@ public class UserController {
         if (userIdStr == null || oldPass == null || newPass == null) {
             return Result.error("-1", "参数不完整");
         }
-
         try {
             userService.changePassword(Long.valueOf(userIdStr), oldPass, newPass);
             return Result.success();
@@ -70,24 +59,25 @@ public class UserController {
         }
     }
 
+    /**
+     * ⭐ 修改：管理员重置密码 (接收 username)
+     */
     @PostMapping("/reset-password")
     public Result<?> resetPassword(@RequestBody Map<String, Object> params) {
-        // 这里最好加个权限校验，确保当前登录的是管理员
-        // 但为了毕设简单，我们假设只有管理员能看到这个按钮
-
-        String userIdStr = params.get("userId").toString();
+        // 获取前端传来的 username
+        String username = (String) params.get("username");
         String newPass = (String) params.get("newPassword");
 
-        if (userIdStr == null || newPass == null) {
-            return Result.error("-1", "参数缺失");
+        if (username == null || newPass == null) {
+            return Result.error("-1", "账号或新密码不能为空");
         }
 
         try {
-            userService.resetPassword(Long.valueOf(userIdStr), newPass);
+            // 调用新的根据用户名重置的方法
+            userService.resetPasswordByUsername(username, newPass);
             return Result.success();
         } catch (Exception e) {
             return Result.error("-1", e.getMessage());
         }
     }
-
 }
