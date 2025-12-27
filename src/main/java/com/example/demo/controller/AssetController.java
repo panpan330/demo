@@ -1,50 +1,82 @@
 package com.example.demo.controller;
 
+import com.example.demo.common.Result;
 import com.example.demo.entity.AssetDevice;
 import com.example.demo.service.AssetService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import java.util.List;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/asset")
-@CrossOrigin(origins = "*")
+@CrossOrigin
 public class AssetController {
 
     @Autowired
     private AssetService assetService;
 
+    // 1. 列表查询
     @GetMapping("/list")
-    public List<AssetDevice> list() { return assetService.getAllDevices(); }
-
-    @PostMapping("/borrow/{id}")
-    public String borrow(@PathVariable Long id) {
-        assetService.borrowDevice(id);
-        return "success";
+    public Result<?> list() {
+        return Result.success(assetService.findAll());
     }
 
-    @PostMapping("/return/{id}")
-    public String returnDev(@PathVariable Long id) {
-        assetService.returnDevice(id);
-        return "success";
-    }
-
-    // ⭐ 新增 CRUD 接口
+    // 2. 新增
     @PostMapping("/add")
-    public String add(@RequestBody AssetDevice device) {
-        assetService.addDevice(device);
-        return "success";
+    public Result<?> add(@RequestBody AssetDevice asset) {
+        try {
+            assetService.addAsset(asset);
+            return Result.success();
+        } catch (Exception e) {
+            return Result.error("-1", "入库失败：" + e.getMessage());
+        }
     }
 
-    @PutMapping("/update")
-    public String update(@RequestBody AssetDevice device) {
-        assetService.updateDevice(device);
-        return "success";
+    // 3. 借用设备
+    @PostMapping("/borrow")
+    public Result<?> borrow(@RequestBody Map<String, Object> params) {
+        // 参数校验
+        if (params.get("assetId") == null || params.get("userId") == null) {
+            return Result.error("-1", "参数缺失");
+        }
+
+        Long assetId = Long.valueOf(params.get("assetId").toString());
+        Long userId = Long.valueOf(params.get("userId").toString());
+
+        try {
+            // ⭐ 所有的判断逻辑都在 Service 里，Controller 直接调
+            assetService.borrowAsset(assetId, userId);
+            return Result.success();
+        } catch (RuntimeException e) {
+            return Result.error("-1", e.getMessage()); // 捕获 "设备已被借走" 等异常
+        }
     }
 
+    // 4. 归还设备
+    @PostMapping("/return")
+    public Result<?> returnAsset(@RequestBody Map<String, Object> params) {
+        if (params.get("assetId") == null) {
+            return Result.error("-1", "参数缺失");
+        }
+        Long assetId = Long.valueOf(params.get("assetId").toString());
+
+        try {
+            assetService.returnAsset(assetId);
+            return Result.success();
+        } catch (Exception e) {
+            return Result.error("-1", "归还失败：" + e.getMessage());
+        }
+    }
+
+    // 5. 删除
     @DeleteMapping("/delete/{id}")
-    public String delete(@PathVariable Long id) {
-        assetService.deleteDevice(id);
-        return "success";
+    public Result<?> delete(@PathVariable Long id) {
+        try {
+            assetService.deleteAsset(id);
+            return Result.success();
+        } catch (Exception e) {
+            return Result.error("-1", "删除失败");
+        }
     }
 }

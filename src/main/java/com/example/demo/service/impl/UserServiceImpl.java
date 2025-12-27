@@ -1,12 +1,12 @@
 package com.example.demo.service.impl;
 
 import cn.hutool.crypto.digest.BCrypt;
-import com.example.demo.common.JwtUtils;
+import com.example.demo.common.JwtUtils; // 确保你有这个工具类
 import com.example.demo.entity.User;
 import com.example.demo.mapper.UserMapper;
 import com.example.demo.service.UserService;
 import org.springframework.stereotype.Service;
-import jakarta.annotation.Resource; // Spring Boot 3.x 使用 jakarta，旧版本用 javax
+import jakarta.annotation.Resource;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,19 +20,17 @@ public class UserServiceImpl implements UserService {
     @Override
     public Map<String, Object> login(User user) {
         // 1. 查询用户
-        // 注意：需确保 UserMapper 中有 selectByUsername 方法
         User dbUser = userMapper.selectByUsername(user.getUsername());
         if (dbUser == null) {
             throw new RuntimeException("用户不存在");
         }
 
-        // 2. 校验密码 (兼容逻辑)
+        // 2. 校验密码
         boolean isMatch = false;
-        // 情况A: 明文直接匹配（兼容旧账号）
+        // 兼容逻辑：先试明文，再试加密
         if (dbUser.getPassword().equals(user.getPassword())) {
             isMatch = true;
         } else {
-            // 情况B: 尝试 BCrypt 加密匹配
             try {
                 isMatch = BCrypt.checkpw(user.getPassword(), dbUser.getPassword());
             } catch (Exception e) {
@@ -48,34 +46,39 @@ public class UserServiceImpl implements UserService {
         String token = JwtUtils.createToken(dbUser.getId(), dbUser.getRole());
 
         // 4. 封装返回结果
-        dbUser.setPassword(null); // 擦除密码，防止泄露
+        dbUser.setPassword(null); // 擦除密码
 
         Map<String, Object> resultMap = new HashMap<>();
         resultMap.put("token", token);
-        resultMap.put("userInfo", dbUser);
+        // ⭐⭐ 关键修改：Key 必须叫 "user"，因为前端 Login.vue 读的是 res.data.user
+        resultMap.put("user", dbUser);
 
         return resultMap;
     }
 
     @Override
     public void register(User user) {
-        // 1. 校验用户名是否已存在
+        // 1. 校验存在
         User exist = userMapper.selectByUsername(user.getUsername());
         if (exist != null) {
             throw new RuntimeException("用户名已存在");
         }
-
-        // 2. 设置默认密码
+        // 2. 默认密码
         if (user.getPassword() == null || "".equals(user.getPassword())) {
             user.setPassword("123456");
         }
+        // 3. 加密
+        user.setPassword(BCrypt.hashpw(user.getPassword()));
 
-        // 3. 密码加密 (使用 Hutool BCrypt)
-        String rawPwd = user.getPassword();
-        String encodedPwd = BCrypt.hashpw(rawPwd);
-        user.setPassword(encodedPwd);
+        // 4. 默认角色
+        if (user.getRole() == null) {
+            user.setRole("STUDENT");
+        }
 
-        // 4. 插入数据库
+        // 5. 插入
         userMapper.insert(user);
     }
+
+    // 如果你还需要 selectByUsername 给其他地方用，可以在这里加上，并在接口里声明
+    // 但按照标准写法，Controller 不应该直接调这个
 }

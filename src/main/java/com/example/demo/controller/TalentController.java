@@ -13,18 +13,37 @@ import java.util.stream.Collectors;
 
 /**
  * 人才管理控制层
- * 提供：列表查询、新增、修改、删除、以及首页仪表盘统计数据
+ * 功能包含：
+ * 1. 管理员用：增删改查、仪表盘统计
+ * 2. 学生/医生用：查询个人档案 (My Profile)
  */
 @RestController
 @RequestMapping("/api/talent")
-@CrossOrigin // 允许跨域，这点很重要
+@CrossOrigin // 允许跨域
 public class TalentController {
 
     @Resource
     private TalentService talentService;
 
     /**
-     * 1. 查询所有人才列表
+     * ⭐ 新增：根据 UserID 获取人才档案
+     * 用于“个人中心”页面加载当前登录用户的信息
+     */
+    @GetMapping("/profile/{userId}")
+    public Result<?> getProfile(@PathVariable Long userId) {
+        // 调用 Service 层的新方法
+        Talent talent = talentService.getTalentByUserId(userId);
+
+        if (talent != null) {
+            return Result.success(talent);
+        } else {
+            // 如果没找到（比如管理员账号没有关联人才档案），返回错误提示
+            return Result.error("-1", "未找到关联的人才档案，请联系管理员录入");
+        }
+    }
+
+    /**
+     * 1. 查询所有人才列表 (管理员用)
      */
     @GetMapping("/list")
     public Result<?> findAll() {
@@ -71,7 +90,7 @@ public class TalentController {
     }
 
     /**
-     * ⭐ 5. [新功能] 首页仪表盘统计数据接口
+     * 5. 首页仪表盘统计数据接口
      * 不需要改数据库，直接查出来在内存里计算
      */
     @GetMapping("/dashboard")

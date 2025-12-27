@@ -7,30 +7,19 @@ import java.util.List;
 @Mapper
 public interface AssetMapper {
 
-    // 查 (已有)
-    @Select("SELECT d.*, c.name as categoryName FROM asset_device d " +
-            "LEFT JOIN asset_category c ON d.category_id = c.id " +
-            "ORDER BY d.id DESC")
+    @Select("SELECT * FROM sys_asset_device")
     List<AssetDevice> findAll();
 
-    // 借/还 (已有)
-    @Update("UPDATE asset_device SET status = 'BORROWED' WHERE id = #{id}")
-    void borrowDevice(Long id);
+    @Select("SELECT * FROM sys_asset_device WHERE id = #{id}")
+    AssetDevice findById(Long id);
 
-    @Update("UPDATE asset_device SET status = 'IDLE' WHERE id = #{id}")
-    void returnDevice(Long id);
+    @Insert("INSERT INTO sys_asset_device(device_name, device_code, status, create_time) VALUES(#{deviceName}, #{deviceCode}, #{status}, NOW())")
+    void insert(AssetDevice asset);
 
-    // ⭐ 新增：设备入库
-    @Insert("INSERT INTO asset_device (category_id, device_name, device_code, status, price) " +
-            "VALUES (#{categoryId}, #{deviceName}, #{deviceCode}, 'IDLE', #{price})")
-    void add(AssetDevice device);
+    // ⭐ 核心：更新状态和借用人
+    @Update("UPDATE sys_asset_device SET status = #{status}, borrower_id = #{borrowerId} WHERE id = #{id}")
+    void updateStatusAndBorrower(@Param("id") Long id, @Param("status") String status, @Param("borrowerId") Long borrowerId);
 
-    // ⭐ 修改：资产盘点/修正
-    @Update("UPDATE asset_device SET category_id=#{categoryId}, device_name=#{deviceName}, " +
-            "device_code=#{deviceCode}, price=#{price} WHERE id=#{id}")
-    void update(AssetDevice device);
-
-    // ⭐ 删除：资产报废
-    @Delete("DELETE FROM asset_device WHERE id = #{id}")
-    void delete(Long id);
+    @Delete("DELETE FROM sys_asset_device WHERE id = #{id}")
+    void deleteById(Long id);
 }

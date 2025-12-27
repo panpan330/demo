@@ -6,15 +6,12 @@ import java.util.Map;
 public interface UserService {
 
     /**
-     * 用户登录
-     * @param user 前端传来的用户对象（包含 username, password）
-     * @return 包含 token 和 userInfo 的 Map
+     * 用户登录，返回 Token 和 UserInfo
      */
     Map<String, Object> login(User user);
 
     /**
-     * 注册/新增用户
-     * @param user 新用户对象
+     * 注册用户
      */
     void register(User user);
 }
