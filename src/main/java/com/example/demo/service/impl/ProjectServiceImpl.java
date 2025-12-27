@@ -1,38 +1,32 @@
 package com.example.demo.service.impl;
 
 import com.example.demo.entity.Project;
-import com.example.demo.entity.ProjectTask;
 import com.example.demo.mapper.ProjectMapper;
 import com.example.demo.service.ProjectService;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional; // 引入事务管理
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class ProjectServiceImpl implements ProjectService {
 
-    @Autowired
+    @Resource
     private ProjectMapper projectMapper;
 
     @Override
-    public List<Project> getAllProjects() {
-        return projectMapper.findAllProjects();
-    }
-
-    @Override
-    public List<ProjectTask> getTasks(Long projectId) {
-        return projectMapper.findTasksByProjectId(projectId);
+    public List<Project> findAll() {
+        return projectMapper.findAll();
     }
 
     @Override
     public void addProject(Project project) {
-        // 这里可以加逻辑：比如判断项目名是否重复，或者设置默认状态
+        // 可以在这里加业务逻辑，比如：如果没有状态，默认设置为 ONGOING
         if (project.getStatus() == null) {
             project.setStatus("ONGOING");
         }
-        projectMapper.add(project);
+        projectMapper.insert(project);
     }
 
     @Override
@@ -41,13 +35,16 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    @Transactional // ⭐ 加上事务注解：保证删除项目和删除关联任务要么都成功，要么都失败
     public void deleteProject(Long id) {
-        // 1. 先删除项目主表记录
-        projectMapper.delete(id);
+        projectMapper.deleteById(id);
+    }
 
-        // 2. (可选完善) 最好同时也删除该项目下的任务，防止产生脏数据
-        // 如果你的 ProjectMapper 里还没有 deleteTasksByProjectId 方法，暂时可以不写这一行
-        // projectMapper.deleteTasksByProjectId(id);
+    /**
+     * ⭐ 实现：查询我的项目
+     */
+    @Override
+    public List<Map<String, Object>> getMyProjects(Long talentId) {
+        // 直接调用 Mapper
+        return projectMapper.findMyProjects(talentId);
     }
 }

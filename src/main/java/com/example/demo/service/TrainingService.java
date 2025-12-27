@@ -4,15 +4,19 @@ import com.example.demo.entity.Training;
 import java.util.List;
 
 public interface TrainingService {
-    List<Training> getAllTrainings();
-    List<Training> getTalentTrainings(Long talentId);
 
-    // ⭐ AI 核心功能
-    List<String> autoAssign(Long talentId);
+    // 查询所有
+    List<Training> findAll();
 
+    // 查询某人的任务
+    List<Training> findByTalentId(Long talentId);
+
+    // 新增/指派任务
     void addTraining(Training training);
-    void assignTraining(Training training); // 用于去重插入
-    void updateTraining(Training training);
-    void updateStatus(Long id, String status);
+
+    // 更新状态
+    void updateStatus(Training training);
+
+    // 删除任务
     void deleteTraining(Long id);
 }

@@ -1,31 +1,26 @@
 package com.example.demo.entity;
 
-import com.alibaba.excel.annotation.ExcelProperty;
 import lombok.Data;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Data
 public class AssetDevice {
-    @ExcelProperty("设备ID")
     private Long id;
-
-    // 这一列我们导出的时候通常希望显示“分类名”，而不是ID
-    // 但为了简单，先导出ID，或者你可以让 SQL 查出来 categoryName 填进去
-    @ExcelProperty("分类ID")
     private Long categoryId;
-
-    @ExcelProperty("设备名称")
     private String deviceName;
-
-    @ExcelProperty("资产编号")
     private String deviceCode;
 
-    @ExcelProperty("当前状态")
+    // 状态: IDLE(空闲)/BORROWED(借出)/BROKEN(维修)
     private String status;
 
-    @ExcelProperty("采购单价")
     private BigDecimal price;
 
-    @ExcelProperty("所属分类")
-    private String categoryName;
+    private LocalDateTime createTime;
+
+    /**
+     * ⭐ 新增字段：当前借用人ID
+     * 对应数据库里的 borrower_id 字段
+     */
+    private Long borrowerId;
 }

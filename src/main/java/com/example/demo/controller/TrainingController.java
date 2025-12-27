@@ -6,64 +6,56 @@ import com.example.demo.service.TrainingService;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/training")
-@CrossOrigin // 允许跨域
+@CrossOrigin
 public class TrainingController {
 
     @Resource
     private TrainingService trainingService;
 
-    // 获取所有
-    @GetMapping("/all")
-    public Result<?> all() {
-        return Result.success(trainingService.getAllTrainings());
+    // 1. 查询列表
+    @GetMapping("/list")
+    public Result<?> list() {
+        return Result.success(trainingService.findAll());
     }
 
-    // 获取某人
+    // 2. 根据 TalentID 查询
     @GetMapping("/list/{talentId}")
-    public Result<?> listOne(@PathVariable Long talentId) {
-        return Result.success(trainingService.getTalentTrainings(talentId));
+    public Result<?> listByTalentId(@PathVariable Long talentId) {
+        return Result.success(trainingService.findByTalentId(talentId));
     }
 
-    // ⭐ AI 自动指派接口
-    @PostMapping("/auto-assign/{talentId}")
-    public Result<?> autoAssign(@PathVariable Long talentId) {
+    // 3. 新增
+    @PostMapping("/add")
+    public Result<?> add(@RequestBody Training training) {
         try {
-            List<String> courses = trainingService.autoAssign(talentId);
-            return Result.success(courses);
+            trainingService.addTraining(training);
+            return Result.success();
         } catch (Exception e) {
-            return Result.error("-1", e.getMessage());
+            return Result.error("-1", "添加失败");
         }
     }
 
-    // 手动新增
-    @PostMapping("/add")
-    public Result<?> add(@RequestBody Training training) {
-        trainingService.addTraining(training);
-        return Result.success();
-    }
-
-    // 更新信息
-    @PutMapping("/update")
-    public Result<?> update(@RequestBody Training training) {
-        trainingService.updateTraining(training);
-        return Result.success();
-    }
-
-    // 快捷更新状态
+    // 4. 更新状态
     @PostMapping("/update-status")
     public Result<?> updateStatus(@RequestBody Training training) {
-        trainingService.updateStatus(training.getId(), training.getStatus());
-        return Result.success();
+        try {
+            trainingService.updateStatus(training);
+            return Result.success();
+        } catch (Exception e) {
+            return Result.error("-1", "更新失败");
+        }
     }
 
-    // 删除
+    // 5. 删除
     @DeleteMapping("/delete/{id}")
     public Result<?> delete(@PathVariable Long id) {
-        trainingService.deleteTraining(id);
-        return Result.success();
+        try {
+            trainingService.deleteTraining(id);
+            return Result.success();
+        } catch (Exception e) {
+            return Result.error("-1", "删除失败");
+        }
     }
 }
